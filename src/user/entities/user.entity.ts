@@ -2,6 +2,7 @@ import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeor
 
 import { Role } from '../types/userRole.type';
 import { Show } from '../../show/entities/show.entity';
+import { Ticket } from '../../show/entities/ticket.entity';
 
 @Index('email', ['email'], { unique: true })
 @Entity({
@@ -34,4 +35,7 @@ export class User {
 
   @OneToMany(() => Show, (show) => show.user)
   show: Show[];
+
+  @OneToMany(() => Ticket, (ticket) => ticket.user)
+  ticket: Ticket[];
 }

@@ -9,6 +9,7 @@ import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
 import { Show } from './show/entities/show.entity';
 import { Seat } from './show/entities/seat.entity';
+import { Ticket } from './show/entities/ticket.entity';
 import { ShowModule } from './show/show.module';
 
 const typeOrmModuleOptions = {
@@ -22,7 +23,7 @@ const typeOrmModuleOptions = {
     host: configService.get('DB_HOST'),
     port: configService.get('DB_PORT'),
     database: configService.get('DB_NAME'),
-    entities: [User,Show,Seat],
+    entities: [User,Show,Seat,Ticket],
     synchronize: configService.get('DB_SYNC'),
     logging: true,
   }),

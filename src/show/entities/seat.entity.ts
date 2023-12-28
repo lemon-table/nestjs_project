@@ -1,5 +1,7 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Show } from './show.entity';
+import { Ticket } from './ticket.entity';
+
 @Entity({
   name: 'seats',
 })
@@ -28,4 +30,7 @@ export class Seat {
 
   @Column({ type: 'timestamp', nullable: true })
   updated_at: Date;
+
+  @OneToMany(() => Ticket, (ticket) => ticket.seats)
+  ticket: Ticket[];
 }

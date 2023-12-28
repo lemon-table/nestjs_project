@@ -29,8 +29,14 @@ export class ShowController {
       return await this.showService.findAllShow();
     }
 
-    @Get(':id')
-    async findOneShow(@Param('id') id: number) {
-      return await this.showService.findOneShow(id);
+    @Get(':showId/ticket')
+    async findTicket(@Param('showId') showId: number) {
+      console.log('showId:'+showId);
+      return await this.showService.findTicket(showId);
+    }
+
+    @Get(':showId')
+    async findOneShow(@Param('showId') showId: number) {
+      return await this.showService.findOneShow(showId);
     }
 }

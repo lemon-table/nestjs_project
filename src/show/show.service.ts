@@ -52,9 +52,34 @@ export class ShowService {
        });
     }
 
-    async findOneShow(id: number) {
-        return await this.verifyShowById(id);
+    async findOneShow(showId: number) {
+        return await this.verifyShowById(showId);
     }
+
+    async findTicket(showId: number) {
+        /*
+        const ticket = await this.seatRepository.find({
+          select: ['grade', 'seat_num','seat_price'],
+          where: { 'show_id':showId },
+        });
+        */
+        const tickets = await this.seatRepository
+        .createQueryBuilder('seats')
+        .select([
+          'seats.grade AS grade',
+          'COALESCE((seats.seat_num - COALESCE(Ticket.seat_num, 0)), 0) AS seat_num',
+          'seats.seat_price AS seat_price',
+        ])
+        .leftJoin('tickets', 'Ticket', 'seats.id = Ticket.seat_id AND Ticket.cancel_chk = false')
+        .where('seats.show_id = :showId', { showId })
+        .getRawMany();
+    
+        if (_.isNil(tickets)) {
+          throw new NotFoundException(' 예매 가능한 좌석 정보가 없습니다.');
+        }
+    
+        return tickets;
+      }
 
     private async verifyShowById(id: number) {
         const show = await this.showRepository.findOneBy({ id });
