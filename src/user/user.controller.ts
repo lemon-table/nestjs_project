@@ -1,10 +1,8 @@
 import { UserInfo } from 'src/utils/userInfo.decorator';
-import { Roles } from 'src/auth/roles.decorator';
 import { RolesGuard } from 'src/auth/roles.guard';
-import { Role } from 'src/user/types/userRole.type';
 
 import {
-  Body, Controller, Delete, Get, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors
+  Body, Controller, Get, Post, Put, UseGuards
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 

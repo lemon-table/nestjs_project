@@ -1,6 +1,7 @@
 import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Role } from '../types/userRole.type';
+import { Show } from '../../show/entities/show.entity';
 
 @Index('email', ['email'], { unique: true })
 @Entity({
@@ -30,4 +31,7 @@ export class User {
 
   @Column({ type: 'timestamp', nullable: true })
   updated_at: Date;
+
+  @OneToMany(() => Show, (show) => show.user)
+  show: Show[];
 }
