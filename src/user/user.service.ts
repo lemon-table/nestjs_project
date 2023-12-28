@@ -2,7 +2,7 @@ import { compare, hash } from 'bcrypt';
 import _ from 'lodash';
 import { Repository } from 'typeorm';
 
-import { ConflictException, Injectable, UnauthorizedException,BadRequestException } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -61,6 +61,32 @@ export class UserService {
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async getprofile(userId: number) {
+    const user = await this.userRepository.findOne({
+      select: ['email', 'nickname','point'],
+      where: { 'id':userId },
+    });
+
+    if (_.isNil(user)) {
+      throw new NotFoundException('사용자 정보가 없습니다.');
+    }
+
+    return user;
+  }
+
+  async uptprofile(userId: number,nickname:string) {
+    const user = await this.userRepository.findOne({
+      select: ['email', 'nickname','point'],
+      where: { 'id':userId },
+    });
+
+    if (_.isNil(user)) {
+      throw new NotFoundException('사용자 정보가 없습니다.');
+    }
+
+    await this.userRepository.update({ id:userId }, {nickname});
   }
 
   async findByEmail(email: string) {

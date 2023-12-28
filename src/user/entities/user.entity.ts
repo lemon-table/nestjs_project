@@ -24,4 +24,10 @@ export class User {
 
   @Column({ type: 'int', default: 1000000, nullable: false })
   point: number;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  updated_at: Date;
 }
