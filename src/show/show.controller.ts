@@ -4,10 +4,12 @@ import { Role } from 'src/user/types/userRole.type';
 import { UserInfo } from 'src/utils/userInfo.decorator';
 
 import {
-  Body, Controller, Delete, Get, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors
+  Body, Controller, Get, Param, Post, Put, UseGuards
 } from '@nestjs/common';
 
 import { CreateShowDto } from './dto/create-show.dto';
+import { CreateTicketDto } from './dto/create-ticket.dto';
+
 import { ShowService } from './show.service';
 
 import { User } from '../user/entities/user.entity';
@@ -33,6 +35,18 @@ export class ShowController {
     async findTicket(@Param('showId') showId: number) {
       console.log('showId:'+showId);
       return await this.showService.findTicket(showId);
+    }
+
+    @Roles(Role.User)
+    @Post(':showId/ticket')
+    async createTicket(@UserInfo() user: User,@Param('showId') showId: number, @Body() createticketDto : CreateTicketDto) {
+      return await this.showService.createTicket(user.id,showId,createticketDto.grade,createticketDto.seat_num);
+    }
+
+    @Roles(Role.User)
+    @Put(':showId/ticket/:ticketId')
+    async updateTicket(@UserInfo() user: User,@Param('showId') showId: number, @Param('ticketId') ticketId: number) {
+      return await this.showService.updateTicket(user.id,showId,ticketId);
     }
 
     @Get(':showId')
