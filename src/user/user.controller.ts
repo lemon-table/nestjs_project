@@ -18,25 +18,31 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('signup')
-  async signup(@Body() signupDto: SignUpDto) {
-    return await this.userService.signup(signupDto.email, signupDto.password,signupDto.confirmPassword, signupDto.nickname, signupDto.role, signupDto.point);
+  async signUp(@Body() signupDto: SignUpDto) {
+    return await this.userService.signUp(signupDto.email, signupDto.password,signupDto.confirmPassword, signupDto.nickname, signupDto.role, signupDto.point);
   }
 
   @Post('signin')
-  async signin(@Body() signinDto: SignInDto) {
-    return await this.userService.signin(signinDto.email, signinDto.password);
+  async signIn(@Body() signinDto: SignInDto) {
+    return await this.userService.signIn(signinDto.email, signinDto.password);
   }
 
   @UseGuards(RolesGuard)
   @Get('profile')
-  async getprofile(@UserInfo() user: User) {
-    return await this.userService.getprofile(user.id);
+  async getProfile(@UserInfo() user: User) {
+    return await this.userService.getProfile(user.id);
   }
 
   @UseGuards(RolesGuard)
   @Put('profile')
-  async uptprofile(@UserInfo() user: User, @Body() uptprofileDto: UptProfileDto) {
-    return await this.userService.uptprofile(user.id,uptprofileDto.nickname);
+  async uptProfile(@UserInfo() user: User, @Body() uptprofileDto: UptProfileDto) {
+    return await this.userService.uptProfile(user.id,uptprofileDto.nickname);
+  }
+
+  @UseGuards(RolesGuard)
+  @Get('ticket')
+  async getUserTickets(@UserInfo() user: User) {
+    return await this.userService.getUserTickets(user.id);
   }
 
   @UseGuards(AuthGuard('jwt'))

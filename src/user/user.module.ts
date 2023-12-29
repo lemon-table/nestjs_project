@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { User } from './entities/user.entity';
+import { Ticket } from '../show/entities/ticket.entity';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
@@ -15,7 +16,7 @@ import { UserService } from './user.service';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User,Ticket]),
   ],
   providers: [UserService],
   controllers: [UserController],
