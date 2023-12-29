@@ -7,17 +7,20 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from './entities/user.entity';
+import { Ticket } from '../show/entities/ticket.entity';
 import { Role } from './types/userRole.type';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+        private userRepository: Repository<User>,
+    @InjectRepository(Ticket)
+        private ticketRepository: Repository<Ticket>,
     private readonly jwtService: JwtService,
   ) {}
 
-  async signup(email: string, password: string, confirmPassword: string, nickname:string, role:Role, point:number) {
+  async signUp(email: string, password: string, confirmPassword: string, nickname:string, role:Role, point:number) {
 
     if(password.length < 6){
         throw new BadRequestException(`비밀번호는 최소 6자리 이상이어야 합니다.`);
@@ -44,7 +47,7 @@ export class UserService {
     });
   }
 
-  async signin(email: string, password: string) {
+  async signIn(email: string, password: string) {
     const user = await this.userRepository.findOne({
       select: ['id', 'email', 'password'],
       where: { email },
@@ -63,7 +66,7 @@ export class UserService {
     };
   }
 
-  async getprofile(userId: number) {
+  async getProfile(userId: number) {
     const user = await this.userRepository.findOne({
       select: ['email', 'nickname','point'],
       where: { 'id':userId },
@@ -76,7 +79,7 @@ export class UserService {
     return user;
   }
 
-  async uptprofile(userId: number,nickname:string) {
+  async uptProfile(userId: number,nickname:string) {
     const user = await this.userRepository.findOne({
       select: ['email', 'nickname','point'],
       where: { 'id':userId },
@@ -87,6 +90,35 @@ export class UserService {
     }
 
     await this.userRepository.update({ id:userId }, {nickname});
+  }
+
+  async getUserTickets(userId: number) {
+
+    const tickets = await this.ticketRepository
+    .createQueryBuilder('tickets')
+    .select([
+      'tickets.id AS tickets_id',
+      'tickets.user_id AS user_id',
+      'seats.show_id AS show_id',
+      'shows.show_name AS show_name',
+      'shows.show_category AS show_category',
+      'CONVERT_TZ(shows.show_date, "+00:00", "+09:00") AS show_date',
+      'users.nickname AS nickname',
+      'seats.grade AS grade',
+      'tickets.seat_num AS seat_num',
+      'tickets.cancel_chk AS cancel_chk',
+    ])
+    .leftJoin('seats', 'seats', 'tickets.seat_id = seats.id')
+    .leftJoin('shows', 'shows', 'shows.id = seats.show_id')
+    .leftJoin('users', 'users', 'tickets.user_id = users.id')
+    .where('tickets.user_id = :userId', { userId })
+    .getRawMany();
+
+    if (_.isNil(tickets)) {
+      throw new NotFoundException('예매 정보가 없습니다.');
+    }
+
+    return tickets;
   }
 
   async findByEmail(email: string) {
