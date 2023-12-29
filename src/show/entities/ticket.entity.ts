@@ -31,7 +31,7 @@ export class Ticket {
   @Column({ type: 'int', nullable: false })
   seat_num: number;
 
-  @Column({ type: 'boolean', nullable: false })
+  @Column({ type: 'boolean', default: false, nullable: false })
   cancel_chk: boolean;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
