@@ -136,7 +136,7 @@ export class ShowService {
           const matchingShowPrice = this.findSeatNumByPrice(ticket, grade);
           await this.updateUserPoint(userId,(matchingShowPrice*seat_num));
   
-          await this.ticketRepository.save({
+          await queryRunner.manager.save(Ticket,{
             user_id:userId,
             seat_id:matchingSeatId,
             grade,
@@ -169,7 +169,8 @@ export class ShowService {
           throw new BadRequestException('사용자의 포인트가 부족합니다.');
         }
   
-        await this.userRepository.update({ id:userId }, { point: user.point-seat_price});
+        //await this.userRepository.update({ id:userId }, { point: user.point-seat_price});
+        await queryRunner.manager.update(User,{ id:userId }, { point: user.point-seat_price});
 
         await queryRunner.commitTransaction();
       }catch(err){
