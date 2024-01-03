@@ -4,7 +4,7 @@ import { Role } from 'src/user/types/userRole.type';
 import { UserInfo } from 'src/utils/userInfo.decorator';
 
 import {
-  Body, Controller, Get, Param, Post, Put, UseGuards
+  Body, Controller, Get, Param, Post, Put, UseGuards, Query
 } from '@nestjs/common';
 
 import { CreateShowDto } from './dto/create-show.dto';
@@ -27,13 +27,12 @@ export class ShowController {
     }
 
     @Get()
-    async findAllShow() {
-      return await this.showService.findAllShow();
+    async findAllShow(@Query('search') search?: string) {
+      return await this.showService.findAllShow(search);
     }
 
     @Get(':showId/ticket')
     async findTicket(@Param('showId') showId: number) {
-      console.log('showId:'+showId);
       return await this.showService.findTicket(showId);
     }
 

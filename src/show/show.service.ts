@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Repository, DataSource } from 'typeorm';
 
-import { ConflictException, Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Show } from './entities/show.entity';
@@ -50,17 +50,38 @@ export class ShowService {
   
         // Seat 정보 저장
         await this.seatRepository.save(seats);
+
+        return {
+          "message":"공연 등록 되었습니다.",
+          "success": true
+        }
     
     }
 
-    async findAllShow(): Promise<Show[]> {
-        return await this.showRepository.find({
-          select: ['id', 'show_name','show_date','show_time','show_category'],
-       });
+    async findAllShow(search?: string) {
+      const queryBuilder = this.showRepository.createQueryBuilder('shows').select(['id', 'show_name', 'show_date', 'show_time', 'show_category']);
+
+      if (search !== undefined) {
+        queryBuilder.where('shows.show_name LIKE :search', { search: `%${search}%` });
+      }
+
+      const shows = await queryBuilder.getRawMany();
+    
+      return {
+        "message":"공연 목록 조회되었습니다.",
+        "success": true,
+        "data":shows
+      }
     }
 
     async findOneShow(showId: number) {
-        return await this.verifyShowById(showId);
+      const show = await this.verifyShowById(showId);
+
+        return {
+          "message":"공연 상세정보 조회되었습니다.",
+          "success": true,
+          "data":show
+        }
     }
 
     async findTicket(showId: number) {
@@ -80,11 +101,15 @@ export class ShowService {
         .groupBy('seats.id, seats.grade, seats.seat_num, seats.seat_price, shows.show_date, shows.show_time')
         .getRawMany();
     
-        if (_.isNil(tickets)) {
+        if (_.isEmpty(tickets)) {
           throw new NotFoundException(' 예매 가능한 좌석 정보가 없습니다.');
         }
     
-        return tickets;
+        return {
+          "message":"예매 가능 좌석이 조회되었습니다.",
+          "success": true,
+          "data":tickets
+        }
       }
 
     async createTicket(userId:number,showId: number, grade: string, seat_num: number) {
@@ -97,8 +122,13 @@ export class ShowService {
       try{
 
         const ticket = await this.findTicket(showId);
-        const matchingSeatNum = this.findSeatNumByGrade(ticket, grade);
-        const matchingSeatId = this.findSeatNumBySeatId(ticket, grade);
+
+        if (_.isNil(ticket.data)) {
+          throw new NotFoundException('티켓 정보가 없습니다.');
+        }
+
+        const matchingSeatNum = this.findSeatNumByGrade(ticket.data, grade);
+        const matchingSeatId = this.findSeatNumBySeatId(ticket.data, grade);
   
         if (_.isNil(matchingSeatNum) || _.isNil(matchingSeatId)) {
           throw new NotFoundException('공연에 해당 등급 좌석 정보가 없습니다.');
@@ -112,8 +142,8 @@ export class ShowService {
           throw new BadRequestException('해당 등급 좌석이 부족합니다.');
         }
   
-        const matchingShowDate = this.findSeatNumByShowDate(ticket, grade).toISOString().split('T')[0];
-        const matchingShowTime = this.findSeatNumByShowTime(ticket, grade);
+        const matchingShowDate = this.findSeatNumByShowDate(ticket.data, grade).toISOString().split('T')[0];
+        const matchingShowTime = this.findSeatNumByShowTime(ticket.data, grade);
         
   
         // 현재 날짜와 시간을 가져옴
@@ -133,7 +163,7 @@ export class ShowService {
           throw new BadRequestException('공연 세시간 전은 예매 불가합니다.');
         }else{
   
-          const matchingShowPrice = this.findSeatNumByPrice(ticket, grade);
+          const matchingShowPrice = this.findSeatNumByPrice(ticket.data, grade);
           await this.updateUserPoint(userId,(matchingShowPrice*seat_num));
   
           await queryRunner.manager.save(Ticket,{
@@ -142,13 +172,27 @@ export class ShowService {
             grade,
             seat_num
           });
+
+          await queryRunner.commitTransaction();
   
         }
 
-        await queryRunner.commitTransaction();
+        return {
+          "message":"공연 예매 성공했습니다.",
+          "success": true
+        }
 
       }catch(err){
         await queryRunner.rollbackTransaction();
+
+        if (err instanceof HttpException) {
+          // HttpException을 상속한 경우(statusCode 속성이 있는 경우)
+          throw err;
+        } else {
+          // 그 외의 예외
+          throw new InternalServerErrorException('서버 에러가 발생했습니다.');
+        }
+
       }finally{
         await queryRunner.release();
       }
@@ -169,12 +213,19 @@ export class ShowService {
           throw new BadRequestException('사용자의 포인트가 부족합니다.');
         }
   
-        //await this.userRepository.update({ id:userId }, { point: user.point-seat_price});
         await queryRunner.manager.update(User,{ id:userId }, { point: user.point-seat_price});
 
         await queryRunner.commitTransaction();
       }catch(err){
         await queryRunner.rollbackTransaction();
+
+        if (err instanceof HttpException) {
+          // HttpException을 상속한 경우(statusCode 속성이 있는 경우)
+          throw err;
+        } else {
+          // 그 외의 예외
+          throw new InternalServerErrorException('서버 에러가 발생했습니다.');
+        }
       }finally{
         await queryRunner.release();
       }
@@ -220,18 +271,13 @@ export class ShowService {
         .where('tickets.id = :ticketId', { ticketId })
         .getRawMany();
     
-        if (_.isNil(tickets)) {
-          throw new NotFoundException(' 수정가능한 티켓 정보가 아닙니다.');
+        if (_.isEmpty(tickets)) {
+          throw new NotFoundException('수정가능한 티켓 정보가 없습니다.');
         }
 
         const seatPrice = tickets[0].seat_price;
         const seatNum = tickets[0].seat_num;
 
-        console.log('tickets:'+tickets);
-        console.log('seatPrice:'+seatPrice);
-        console.log('point:'+user.point);
-
-        //await this.ticketRepository.update({ id:ticketId }, { cancel_chk:true });
         // 쿼리 실행을 트랜잭션 내에서 직접 수행
         await queryRunner.manager.update(Ticket, { id: ticketId }, { cancel_chk: true });
 
@@ -239,8 +285,21 @@ export class ShowService {
         await queryRunner.manager.update(User, { id: userId }, { point: (user.point + (seatPrice*seatNum)) });
         
         await queryRunner.commitTransaction();
+
+        return {
+          "message":"티켓 예매를 취소했습니다.",
+          "success": true
+        }
       }catch(err){
         await queryRunner.rollbackTransaction();
+
+        if (err instanceof HttpException) {
+          // HttpException을 상속한 경우(statusCode 속성이 있는 경우)
+          throw err;
+        } else {
+          // 그 외의 예외
+          throw new InternalServerErrorException('서버 에러가 발생했습니다.');
+        }
       }finally{
         await queryRunner.release();
       }
