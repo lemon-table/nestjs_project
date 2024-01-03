@@ -22,6 +22,11 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
+## Api specification
+
+## Entity Relationship Diagram(ERD)
+[NestJS Project ERD](https://www.erdcloud.com/p/gedfQ9RNgNr4FPrHE)
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
