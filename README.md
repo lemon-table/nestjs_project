@@ -24,7 +24,7 @@
 
 ## Api specification
 
-## Entity Relationship Diagram(ERD)
+## ERD (Entity Relationship Diagram)
 [NestJS Project ERD](https://www.erdcloud.com/p/gedfQ9RNgNr4FPrHE)
 
 ## Description
