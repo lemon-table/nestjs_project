@@ -45,6 +45,12 @@ export class UserService {
       role,
       point
     });
+
+    return{
+      "message": "회원가입에 성공했습니다.",
+      "success": true,
+      "data":{email,nickname,role,point}
+    }
   }
 
   async signIn(email: string, password: string) {
@@ -52,17 +58,17 @@ export class UserService {
       select: ['id', 'email', 'password'],
       where: { email },
     });
-    if (_.isNil(user)) {
-      throw new UnauthorizedException('이메일을 확인해주세요.');
-    }
 
-    if (!(await compare(password, user.password))) {
-      throw new UnauthorizedException('비밀번호를 확인해주세요.');
+    // 이메일 또는 패스워드로 오류 조건 변경
+    if (_.isNil(user) || !(await compare(password, user.password))) {
+      throw new UnauthorizedException('이메일 또는 패스워드를 확인해주세요.');
     }
 
     const payload = { email, sub: user.id };
     return {
-      access_token: this.jwtService.sign(payload),
+      "message": "로그인에 성공했습니다.",
+      "success": true,
+      "data":{access_token: this.jwtService.sign(payload,{ expiresIn: '10m' })}
     };
   }
 
@@ -76,7 +82,11 @@ export class UserService {
       throw new NotFoundException('사용자 정보가 없습니다.');
     }
 
-    return user;
+    return {
+      "message": "프로필 상세정보 조회되었습니다.",
+      "success": true,
+      "data":user
+    };
   }
 
   async uptProfile(userId: number,nickname:string) {
@@ -90,7 +100,12 @@ export class UserService {
     }
 
     await this.userRepository.update({ id:userId }, {nickname});
-  }
+
+    return {
+      "message": "프로필 정보를 수정했습니다.",
+      "success": true,
+    }
+  } 
 
   async getUserTickets(userId: number) {
 
@@ -118,7 +133,12 @@ export class UserService {
       throw new NotFoundException('예매 정보가 없습니다.');
     }
 
-    return tickets;
+    return {
+      "message": "사용자 예매 목록 조회되었습니다.",
+      "success": true,
+      "data": tickets
+    };
+    
   }
 
   async findByEmail(email: string) {
