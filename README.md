@@ -27,6 +27,29 @@
 ## ERD (Entity Relationship Diagram)
 [NestJS Project ERD](https://www.erdcloud.com/p/gedfQ9RNgNr4FPrHE)
 
+## Github Rules
+
+- 주요 이슈 커밋 메시지
+    - **feat**: 새로운 기능이 추가된 경우
+    - **fix**: 버그를 수정한 경우
+    - **docs**: 코드 수정 없이 문서만 추가된 경우
+    - **style**: 코드 포맷팅을 수정한 경우
+    - **chore**: 그 밖의 잡다한 일을 처리한 경우
+
+## Code Convention
+
+```javascript
+{
+  "printWidth": 120,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": false,
+  "bracketSpacing": true,
+  "trailingComma": "none"
+}
+```
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
