@@ -11,6 +11,8 @@ import { Show } from './show/entities/show.entity';
 import { Seat } from './show/entities/seat.entity';
 import { Ticket } from './show/entities/ticket.entity';
 import { ShowModule } from './show/show.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 const typeOrmModuleOptions = {
   useFactory: async (
@@ -49,7 +51,7 @@ const typeOrmModuleOptions = {
     UserModule,
     ShowModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
