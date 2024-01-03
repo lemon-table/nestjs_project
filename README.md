@@ -24,7 +24,10 @@
 
 ## Api specification
 
+[NestJS Project API](https://docs.google.com/spreadsheets/d/1tyKSs7hsI5rO1hGe81_6uIHtnykD5FEchd7Ih8ivjvM/edit?usp=sharing)
+
 ## ERD (Entity Relationship Diagram)
+
 [NestJS Project ERD](https://www.erdcloud.com/p/gedfQ9RNgNr4FPrHE)
 
 ## Github Rules
